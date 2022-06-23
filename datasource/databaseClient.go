@@ -3,6 +3,7 @@ package datasource
 import (
 	"context"
 	"example-project/model"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -13,6 +14,7 @@ import (
 type MongoDBInterface interface {
 	FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult
 	InsertMany(ctx context.Context, documents []interface{}, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error)
+	DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 }
 
 type Client struct {
@@ -44,4 +46,15 @@ func (c Client) GetByID(id string) model.Employee {
 		log.Println("error during data marshalling")
 	}
 	return employee
+}
+func (c Client) DeleteByID(id string) (*mongo.DeleteResult, error) {
+	filter := bson.M{"id": id}
+	results, err := c.Employee.DeleteOne(context.TODO(), filter)
+	fmt.Println(results)
+	if err == nil {
+		return results, nil
+	} else {
+		return results, err
+	}
+
 }
