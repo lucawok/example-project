@@ -47,14 +47,10 @@ func (c Client) GetByID(id string) model.Employee {
 	}
 	return employee
 }
-func (c Client) DeleteByID(id string) (*mongo.DeleteResult, error) {
+func (c Client) DeleteByID(id string) interface{} {
 	filter := bson.M{"id": id}
-	results, err := c.Employee.DeleteOne(context.TODO(), filter)
+	results, _ := c.Employee.DeleteOne(context.TODO(), filter)
 	fmt.Println(results)
-	if err == nil {
-		return results, nil
-	} else {
-		return results, err
-	}
+	return results
 
 }

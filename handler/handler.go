@@ -10,7 +10,7 @@ import (
 type ServiceInterface interface {
 	CreateEmployees(employees []model.Employee) interface{}
 	GetEmployeeById(id string) model.Employee
-	DeleteEmployeeHandler(id string) model.Employee
+	DeleteEmployeeById(id string) interface{}
 }
 
 type Handler struct {
@@ -58,6 +58,6 @@ func (handler Handler) DeleteEmployeeHandler(c *gin.Context) {
 		})
 		return
 	}
-	response := handler.ServiceInterface.DeleteEmployeeHandler(pathParam)
+	response := handler.ServiceInterface.DeleteEmployeeById(pathParam)
 	c.JSON(http.StatusOK, response)
 }

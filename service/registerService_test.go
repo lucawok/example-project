@@ -26,6 +26,18 @@ func TestGetEmployeeById(t *testing.T) {
 
 }
 
-func TestCreateEmployees(t *testing.T) {
-	//here comes your first unit test which should cover the function CreateEmployees
+func TestDeleteEmployeeById(t *testing.T) {
+	fakeDB := &servicefakes.FakeDatabaseInterface{}
+
+	data := model.Employee{
+		ID:        "2",
+		FirstName: "Creative",
+		LastName:  "Name",
+		Email:     "wow@gmail.com",
+	}
+
+	fakeDB.DeleteByIDReturns(data)
+	serviceInstance := service.NewEmployeeService(fakeDB)
+	actual := serviceInstance.DeleteEmployeeById("2")
+	assert.Equal(t, data, actual)
 }
