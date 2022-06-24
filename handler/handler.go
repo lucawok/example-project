@@ -13,6 +13,7 @@ import (
 type ServiceInterface interface {
 	CreateEmployees(employees []model.Employee) interface{}
 	GetEmployeeById(id string) model.Employee
+	GetAllEmployeesHandler() []model.Employee
 	DeleteEmployeeById(id string) (*mongo.DeleteResult, *mongo.DeleteResult)
 }
 
@@ -72,4 +73,8 @@ func (handler Handler) DeleteEmployeeHandler(c *gin.Context) {
 	}
 	fmt.Println(response)
 	c.JSON(http.StatusOK, response)
+}
+
+func (handler Handler) GetAllEmployeesHandler(c *gin.Context) {
+
 }

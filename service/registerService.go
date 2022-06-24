@@ -41,3 +41,7 @@ func (s EmployeeService) DeleteEmployeeById(id string) (*mongo.DeleteResult, *mo
 	return result, err
 
 }
+
+func (s EmployeeService) GetAllEmployees() []model.Employee {
+
+}
