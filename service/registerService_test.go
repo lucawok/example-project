@@ -5,6 +5,7 @@ import (
 	"example-project/service"
 	"example-project/service/servicefakes"
 	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/mongo"
 	"testing"
 )
 
@@ -24,4 +25,18 @@ func TestGetEmployeeById(t *testing.T) {
 	actual := serviceInstance.GetEmployeeById("1")
 	assert.Equal(t, data, actual)
 
+}
+
+func TestDeleteEmployeeById(t *testing.T) {
+	fakeDB := &servicefakes.FakeDatabaseInterface{}
+
+	data := &mongo.DeleteResult{DeletedCount: 1}
+
+	fakeDB.DeleteByIDReturns(&mongo.DeleteResult{DeletedCount: 1}, nil)
+	serviceInstance := service.NewEmployeeService(fakeDB)
+	actual, err := serviceInstance.DeleteEmployeeById("2")
+	if err != nil {
+		assert.Error(t, err)
+	}
+	assert.Equal(t, data, actual)
 }
