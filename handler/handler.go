@@ -70,6 +70,5 @@ func (handler Handler) DeleteEmployeeHandler(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Println(response)
 	c.JSON(http.StatusOK, response)
 }

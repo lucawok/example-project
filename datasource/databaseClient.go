@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"example-project/model"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -55,6 +54,5 @@ func (c Client) DeleteByID(id string) (*mongo.DeleteResult, error) {
 	if results.DeletedCount == 0 {
 		return nil, deleteError
 	}
-	fmt.Println(results)
 	return results, nil
 }
