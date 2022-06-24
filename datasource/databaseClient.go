@@ -2,6 +2,7 @@ package datasource
 
 import (
 	"context"
+	"errors"
 	"example-project/model"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
@@ -47,11 +48,12 @@ func (c Client) GetByID(id string) model.Employee {
 	}
 	return employee
 }
-func (c Client) DeleteByID(id string) (*mongo.DeleteResult, *mongo.DeleteResult) {
+func (c Client) DeleteByID(id string) (*mongo.DeleteResult, error) {
 	filter := bson.M{"id": id}
 	results, _ := c.Employee.DeleteOne(context.TODO(), filter)
+	deleteError := errors.New("delete count is zero")
 	if results.DeletedCount == 0 {
-		return nil, results
+		return nil, deleteError
 	}
 	fmt.Println(results)
 	return results, nil

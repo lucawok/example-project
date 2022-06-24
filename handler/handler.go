@@ -13,7 +13,7 @@ import (
 type ServiceInterface interface {
 	CreateEmployees(employees []model.Employee) interface{}
 	GetEmployeeById(id string) model.Employee
-	DeleteEmployeeById(id string) (*mongo.DeleteResult, *mongo.DeleteResult)
+	DeleteEmployeeById(id string) (*mongo.DeleteResult, error)
 }
 
 type Handler struct {
