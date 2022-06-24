@@ -13,7 +13,7 @@ import (
 type ServiceInterface interface {
 	CreateEmployees(employees []model.Employee) interface{}
 	GetEmployeeById(id string) model.Employee
-	GetAllEmployeesHandler() []model.Employee
+	GetAllEmployees() ([]model.Employee, error)
 	DeleteEmployeeById(id string) (*mongo.DeleteResult, *mongo.DeleteResult)
 }
 
@@ -76,5 +76,6 @@ func (handler Handler) DeleteEmployeeHandler(c *gin.Context) {
 }
 
 func (handler Handler) GetAllEmployeesHandler(c *gin.Context) {
-
+	response, _ := handler.ServiceInterface.GetAllEmployees()
+	c.JSON(http.StatusOK, response)
 }

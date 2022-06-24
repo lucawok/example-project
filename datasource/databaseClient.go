@@ -15,7 +15,7 @@ type MongoDBInterface interface {
 	FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult
 	InsertMany(ctx context.Context, documents []interface{}, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error)
 	DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
-	Get(ctx context.Context, filter interface{}, opts ...*options.FindOptions) (cur *mongo.Cursor, err error)
+	Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) (cur *mongo.Cursor, err error)
 }
 
 type Client struct {
@@ -51,15 +51,21 @@ func (c Client) GetByID(id string) model.Employee {
 
 func (c Client) GetAll() ([]model.Employee, error) {
 	filter := bson.M{}
-	courser, err := c.Employee.Get(context.TODO(), filter)
-	var employee []model.Employee
+	courser, err := c.Employee.Find(context.TODO(), filter)
+
+	var employees []model.Employee
+	if err != nil {
+		return employees, nil
+	}
 	for courser.Next(context.TODO()) {
 		var employee model.Employee
 		err := courser.Decode(&employee)
-		if (err != nil) {
-
+		if err != nil {
+			return employees, err
 		}
+		employees = append(employees, employee)
 	}
+	return employees, nil
 
 }
 func (c Client) DeleteByID(id string) (*mongo.DeleteResult, *mongo.DeleteResult) {
