@@ -1,0 +1,148 @@
+{
+	"info": {
+		"_postman_id": "94f001c7-aea7-4119-a2bf-24c98160754a",
+		"name": "example-project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21612803"
+	},
+	"item": [
+		{
+			"name": "GetEmployee",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", function(){",
+							"    pm.response.to.have.status(200)",
+							"})",
+							"",
+							"const jsonData = pm.response.json()",
+							"",
+							"pm.test(\"Body Test\", function(){",
+							"    pm.expect(jsonData).to.have.property(\"id\", pm.environment.get(\"testid\"))",
+							"    pm.expect(jsonData).to.have.property(\"first_name\", pm.environment.get(\"testprename\"))",
+							"    pm.expect(jsonData).to.have.property(\"last_name\", pm.environment.get(\"testsurname\"))",
+							"    pm.expect(jsonData).to.have.property(\"email\", pm.environment.get(\"testemail\"))",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:9090/employee/{{testid}}/get",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"employee",
+						"{{testid}}",
+						"get"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateEmployee",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", function(){",
+							"    pm.response.to.have.status(200)",
+							"})",
+							"",
+							"const jsonData = pm.response.json()",
+							"",
+							"pm.test(\"Body test\", function(){",
+							"    pm.expect(jsonData).to.not.have.property(\"errorMessage\", \"invalid payload\")",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"employees\": [\n        {\n        \"id\": \"{{testid}}\",\n        \"first_name\": \"{{testprename}}\",\n        \"last_name\": \"{{testsurname}}\",\n        \"email\": \"{{testemail}}\"\n        }\n    ]   \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9090/employee/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"employee",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteEmployee",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", function(){",
+							"    pm.response.to.have.status(200)",
+							"})",
+							"",
+							"const jsonData = pm.response.json()",
+							"",
+							"pm.test(\"Body test\", function(){",
+							"    pm.expect(jsonData).to.not.have.property(\"DeletedCount\", 0)",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/employee/{{testid}}/delete",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"employee",
+						"{{testid}}",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
