@@ -2,12 +2,14 @@ package service
 
 import (
 	"example-project/model"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . DatabaseInterface
 type DatabaseInterface interface {
 	UpdateMany(docs []interface{}) interface{}
 	GetByID(id string) model.Employee
+	DeleteByID(id string) (*mongo.DeleteResult, error)
 }
 
 type EmployeeService struct {
@@ -32,4 +34,10 @@ func (s EmployeeService) CreateEmployees(employees []model.Employee) interface{}
 
 func (s EmployeeService) GetEmployeeById(id string) model.Employee {
 	return s.DbService.GetByID(id)
+}
+
+func (s EmployeeService) DeleteEmployeeById(id string) (*mongo.DeleteResult, error) {
+	result, err := s.DbService.DeleteByID(id)
+	return result, err
+
 }

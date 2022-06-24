@@ -14,6 +14,6 @@ func TestUpdateMany(t *testing.T) {
 	dbClient := datasource.Client{
 		Employee: fakeDb,
 	}
-	actual:= dbClient.UpdateMany([]interface{}{})
+	actual := dbClient.UpdateMany([]interface{}{})
 	assert.NotEmpty(t, actual)
 }
