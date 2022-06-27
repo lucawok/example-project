@@ -2,8 +2,8 @@ package datasource
 
 import (
 	"context"
+	"errors"
 	"example-project/model"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -65,15 +65,19 @@ func (c Client) GetAll() ([]model.Employee, error) {
 		}
 		employees = append(employees, employee)
 	}
+	if len(employees) == 0 {
+		noEmployeesError := errors.New("no employees exist")
+		return nil, noEmployeesError
+	}
 	return employees, nil
 
 }
-func (c Client) DeleteByID(id string) (*mongo.DeleteResult, *mongo.DeleteResult) {
+func (c Client) DeleteByID(id string) (*mongo.DeleteResult, error) {
 	filter := bson.M{"id": id}
-	results, _ := c.Employee.DeleteOne(context.TODO(), filter)
+	results, err := c.Employee.DeleteOne(context.TODO(), filter)
 	if results.DeletedCount == 0 {
-		return nil, results
+		NoUserError := errors.New("no user deleted, please check the id")
+		return results, NoUserError
 	}
-	fmt.Println(results)
-	return results, nil
+	return results, err
 }

@@ -5,19 +5,35 @@ import (
 	"example-project/model"
 	"example-project/service"
 	"sync"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type FakeDatabaseInterface struct {
-	DeleteByIDStub        func(string) interface{}
+	DeleteByIDStub        func(string) (*mongo.DeleteResult, error)
 	deleteByIDMutex       sync.RWMutex
 	deleteByIDArgsForCall []struct {
 		arg1 string
 	}
 	deleteByIDReturns struct {
-		result1 interface{}
+		result1 *mongo.DeleteResult
+		result2 error
 	}
 	deleteByIDReturnsOnCall map[int]struct {
-		result1 interface{}
+		result1 *mongo.DeleteResult
+		result2 error
+	}
+	GetAllStub        func() ([]model.Employee, error)
+	getAllMutex       sync.RWMutex
+	getAllArgsForCall []struct {
+	}
+	getAllReturns struct {
+		result1 []model.Employee
+		result2 error
+	}
+	getAllReturnsOnCall map[int]struct {
+		result1 []model.Employee
+		result2 error
 	}
 	GetByIDStub        func(string) model.Employee
 	getByIDMutex       sync.RWMutex
@@ -45,7 +61,7 @@ type FakeDatabaseInterface struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeDatabaseInterface) DeleteByID(arg1 string) interface{} {
+func (fake *FakeDatabaseInterface) DeleteByID(arg1 string) (*mongo.DeleteResult, error) {
 	fake.deleteByIDMutex.Lock()
 	ret, specificReturn := fake.deleteByIDReturnsOnCall[len(fake.deleteByIDArgsForCall)]
 	fake.deleteByIDArgsForCall = append(fake.deleteByIDArgsForCall, struct {
@@ -59,9 +75,9 @@ func (fake *FakeDatabaseInterface) DeleteByID(arg1 string) interface{} {
 		return stub(arg1)
 	}
 	if specificReturn {
-		return ret.result1
+		return ret.result1, ret.result2
 	}
-	return fakeReturns.result1
+	return fakeReturns.result1, fakeReturns.result2
 }
 
 func (fake *FakeDatabaseInterface) DeleteByIDCallCount() int {
@@ -70,7 +86,7 @@ func (fake *FakeDatabaseInterface) DeleteByIDCallCount() int {
 	return len(fake.deleteByIDArgsForCall)
 }
 
-func (fake *FakeDatabaseInterface) DeleteByIDCalls(stub func(string) interface{}) {
+func (fake *FakeDatabaseInterface) DeleteByIDCalls(stub func(string) (*mongo.DeleteResult, error)) {
 	fake.deleteByIDMutex.Lock()
 	defer fake.deleteByIDMutex.Unlock()
 	fake.DeleteByIDStub = stub
@@ -83,27 +99,86 @@ func (fake *FakeDatabaseInterface) DeleteByIDArgsForCall(i int) string {
 	return argsForCall.arg1
 }
 
-func (fake *FakeDatabaseInterface) DeleteByIDReturns(result1 interface{}) {
+func (fake *FakeDatabaseInterface) DeleteByIDReturns(result1 *mongo.DeleteResult, result2 error) {
 	fake.deleteByIDMutex.Lock()
 	defer fake.deleteByIDMutex.Unlock()
 	fake.DeleteByIDStub = nil
 	fake.deleteByIDReturns = struct {
-		result1 interface{}
-	}{result1}
+		result1 *mongo.DeleteResult
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeDatabaseInterface) DeleteByIDReturnsOnCall(i int, result1 interface{}) {
+func (fake *FakeDatabaseInterface) DeleteByIDReturnsOnCall(i int, result1 *mongo.DeleteResult, result2 error) {
 	fake.deleteByIDMutex.Lock()
 	defer fake.deleteByIDMutex.Unlock()
 	fake.DeleteByIDStub = nil
 	if fake.deleteByIDReturnsOnCall == nil {
 		fake.deleteByIDReturnsOnCall = make(map[int]struct {
-			result1 interface{}
+			result1 *mongo.DeleteResult
+			result2 error
 		})
 	}
 	fake.deleteByIDReturnsOnCall[i] = struct {
-		result1 interface{}
-	}{result1}
+		result1 *mongo.DeleteResult
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeDatabaseInterface) GetAll() ([]model.Employee, error) {
+	fake.getAllMutex.Lock()
+	ret, specificReturn := fake.getAllReturnsOnCall[len(fake.getAllArgsForCall)]
+	fake.getAllArgsForCall = append(fake.getAllArgsForCall, struct {
+	}{})
+	stub := fake.GetAllStub
+	fakeReturns := fake.getAllReturns
+	fake.recordInvocation("GetAll", []interface{}{})
+	fake.getAllMutex.Unlock()
+	if stub != nil {
+		return stub()
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeDatabaseInterface) GetAllCallCount() int {
+	fake.getAllMutex.RLock()
+	defer fake.getAllMutex.RUnlock()
+	return len(fake.getAllArgsForCall)
+}
+
+func (fake *FakeDatabaseInterface) GetAllCalls(stub func() ([]model.Employee, error)) {
+	fake.getAllMutex.Lock()
+	defer fake.getAllMutex.Unlock()
+	fake.GetAllStub = stub
+}
+
+func (fake *FakeDatabaseInterface) GetAllReturns(result1 []model.Employee, result2 error) {
+	fake.getAllMutex.Lock()
+	defer fake.getAllMutex.Unlock()
+	fake.GetAllStub = nil
+	fake.getAllReturns = struct {
+		result1 []model.Employee
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeDatabaseInterface) GetAllReturnsOnCall(i int, result1 []model.Employee, result2 error) {
+	fake.getAllMutex.Lock()
+	defer fake.getAllMutex.Unlock()
+	fake.GetAllStub = nil
+	if fake.getAllReturnsOnCall == nil {
+		fake.getAllReturnsOnCall = make(map[int]struct {
+			result1 []model.Employee
+			result2 error
+		})
+	}
+	fake.getAllReturnsOnCall[i] = struct {
+		result1 []model.Employee
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeDatabaseInterface) GetByID(arg1 string) model.Employee {
@@ -238,6 +313,8 @@ func (fake *FakeDatabaseInterface) Invocations() map[string][][]interface{} {
 	defer fake.invocationsMutex.RUnlock()
 	fake.deleteByIDMutex.RLock()
 	defer fake.deleteByIDMutex.RUnlock()
+	fake.getAllMutex.RLock()
+	defer fake.getAllMutex.RUnlock()
 	fake.getByIDMutex.RLock()
 	defer fake.getByIDMutex.RUnlock()
 	fake.updateManyMutex.RLock()

@@ -9,7 +9,7 @@ import (
 type DatabaseInterface interface {
 	UpdateMany(docs []interface{}) interface{}
 	GetByID(id string) model.Employee
-	DeleteByID(id string) (*mongo.DeleteResult, *mongo.DeleteResult)
+	DeleteByID(id string) (*mongo.DeleteResult, error)
 	GetAll() ([]model.Employee, error)
 }
 
@@ -37,7 +37,7 @@ func (s EmployeeService) GetEmployeeById(id string) model.Employee {
 	return s.DbService.GetByID(id)
 }
 
-func (s EmployeeService) DeleteEmployeeById(id string) (*mongo.DeleteResult, *mongo.DeleteResult) {
+func (s EmployeeService) DeleteEmployeeById(id string) (*mongo.DeleteResult, error) {
 	result, err := s.DbService.DeleteByID(id)
 	return result, err
 

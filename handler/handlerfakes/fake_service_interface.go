@@ -5,6 +5,8 @@ import (
 	"example-project/handler"
 	"example-project/model"
 	"sync"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type FakeServiceInterface struct {
@@ -19,16 +21,30 @@ type FakeServiceInterface struct {
 	createEmployeesReturnsOnCall map[int]struct {
 		result1 interface{}
 	}
-	DeleteEmployeeByIdStub        func(string) interface{}
+	DeleteEmployeeByIdStub        func(string) (*mongo.DeleteResult, error)
 	deleteEmployeeByIdMutex       sync.RWMutex
 	deleteEmployeeByIdArgsForCall []struct {
 		arg1 string
 	}
 	deleteEmployeeByIdReturns struct {
-		result1 interface{}
+		result1 *mongo.DeleteResult
+		result2 error
 	}
 	deleteEmployeeByIdReturnsOnCall map[int]struct {
-		result1 interface{}
+		result1 *mongo.DeleteResult
+		result2 error
+	}
+	GetAllEmployeesStub        func() ([]model.Employee, error)
+	getAllEmployeesMutex       sync.RWMutex
+	getAllEmployeesArgsForCall []struct {
+	}
+	getAllEmployeesReturns struct {
+		result1 []model.Employee
+		result2 error
+	}
+	getAllEmployeesReturnsOnCall map[int]struct {
+		result1 []model.Employee
+		result2 error
 	}
 	GetEmployeeByIdStub        func(string) model.Employee
 	getEmployeeByIdMutex       sync.RWMutex
@@ -111,7 +127,7 @@ func (fake *FakeServiceInterface) CreateEmployeesReturnsOnCall(i int, result1 in
 	}{result1}
 }
 
-func (fake *FakeServiceInterface) DeleteEmployeeById(arg1 string) interface{} {
+func (fake *FakeServiceInterface) DeleteEmployeeById(arg1 string) (*mongo.DeleteResult, error) {
 	fake.deleteEmployeeByIdMutex.Lock()
 	ret, specificReturn := fake.deleteEmployeeByIdReturnsOnCall[len(fake.deleteEmployeeByIdArgsForCall)]
 	fake.deleteEmployeeByIdArgsForCall = append(fake.deleteEmployeeByIdArgsForCall, struct {
@@ -125,9 +141,9 @@ func (fake *FakeServiceInterface) DeleteEmployeeById(arg1 string) interface{} {
 		return stub(arg1)
 	}
 	if specificReturn {
-		return ret.result1
+		return ret.result1, ret.result2
 	}
-	return fakeReturns.result1
+	return fakeReturns.result1, fakeReturns.result2
 }
 
 func (fake *FakeServiceInterface) DeleteEmployeeByIdCallCount() int {
@@ -136,7 +152,7 @@ func (fake *FakeServiceInterface) DeleteEmployeeByIdCallCount() int {
 	return len(fake.deleteEmployeeByIdArgsForCall)
 }
 
-func (fake *FakeServiceInterface) DeleteEmployeeByIdCalls(stub func(string) interface{}) {
+func (fake *FakeServiceInterface) DeleteEmployeeByIdCalls(stub func(string) (*mongo.DeleteResult, error)) {
 	fake.deleteEmployeeByIdMutex.Lock()
 	defer fake.deleteEmployeeByIdMutex.Unlock()
 	fake.DeleteEmployeeByIdStub = stub
@@ -149,27 +165,86 @@ func (fake *FakeServiceInterface) DeleteEmployeeByIdArgsForCall(i int) string {
 	return argsForCall.arg1
 }
 
-func (fake *FakeServiceInterface) DeleteEmployeeByIdReturns(result1 interface{}) {
+func (fake *FakeServiceInterface) DeleteEmployeeByIdReturns(result1 *mongo.DeleteResult, result2 error) {
 	fake.deleteEmployeeByIdMutex.Lock()
 	defer fake.deleteEmployeeByIdMutex.Unlock()
 	fake.DeleteEmployeeByIdStub = nil
 	fake.deleteEmployeeByIdReturns = struct {
-		result1 interface{}
-	}{result1}
+		result1 *mongo.DeleteResult
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *FakeServiceInterface) DeleteEmployeeByIdReturnsOnCall(i int, result1 interface{}) {
+func (fake *FakeServiceInterface) DeleteEmployeeByIdReturnsOnCall(i int, result1 *mongo.DeleteResult, result2 error) {
 	fake.deleteEmployeeByIdMutex.Lock()
 	defer fake.deleteEmployeeByIdMutex.Unlock()
 	fake.DeleteEmployeeByIdStub = nil
 	if fake.deleteEmployeeByIdReturnsOnCall == nil {
 		fake.deleteEmployeeByIdReturnsOnCall = make(map[int]struct {
-			result1 interface{}
+			result1 *mongo.DeleteResult
+			result2 error
 		})
 	}
 	fake.deleteEmployeeByIdReturnsOnCall[i] = struct {
-		result1 interface{}
-	}{result1}
+		result1 *mongo.DeleteResult
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeServiceInterface) GetAllEmployees() ([]model.Employee, error) {
+	fake.getAllEmployeesMutex.Lock()
+	ret, specificReturn := fake.getAllEmployeesReturnsOnCall[len(fake.getAllEmployeesArgsForCall)]
+	fake.getAllEmployeesArgsForCall = append(fake.getAllEmployeesArgsForCall, struct {
+	}{})
+	stub := fake.GetAllEmployeesStub
+	fakeReturns := fake.getAllEmployeesReturns
+	fake.recordInvocation("GetAllEmployees", []interface{}{})
+	fake.getAllEmployeesMutex.Unlock()
+	if stub != nil {
+		return stub()
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeServiceInterface) GetAllEmployeesCallCount() int {
+	fake.getAllEmployeesMutex.RLock()
+	defer fake.getAllEmployeesMutex.RUnlock()
+	return len(fake.getAllEmployeesArgsForCall)
+}
+
+func (fake *FakeServiceInterface) GetAllEmployeesCalls(stub func() ([]model.Employee, error)) {
+	fake.getAllEmployeesMutex.Lock()
+	defer fake.getAllEmployeesMutex.Unlock()
+	fake.GetAllEmployeesStub = stub
+}
+
+func (fake *FakeServiceInterface) GetAllEmployeesReturns(result1 []model.Employee, result2 error) {
+	fake.getAllEmployeesMutex.Lock()
+	defer fake.getAllEmployeesMutex.Unlock()
+	fake.GetAllEmployeesStub = nil
+	fake.getAllEmployeesReturns = struct {
+		result1 []model.Employee
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeServiceInterface) GetAllEmployeesReturnsOnCall(i int, result1 []model.Employee, result2 error) {
+	fake.getAllEmployeesMutex.Lock()
+	defer fake.getAllEmployeesMutex.Unlock()
+	fake.GetAllEmployeesStub = nil
+	if fake.getAllEmployeesReturnsOnCall == nil {
+		fake.getAllEmployeesReturnsOnCall = make(map[int]struct {
+			result1 []model.Employee
+			result2 error
+		})
+	}
+	fake.getAllEmployeesReturnsOnCall[i] = struct {
+		result1 []model.Employee
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeServiceInterface) GetEmployeeById(arg1 string) model.Employee {
@@ -240,6 +315,8 @@ func (fake *FakeServiceInterface) Invocations() map[string][][]interface{} {
 	defer fake.createEmployeesMutex.RUnlock()
 	fake.deleteEmployeeByIdMutex.RLock()
 	defer fake.deleteEmployeeByIdMutex.RUnlock()
+	fake.getAllEmployeesMutex.RLock()
+	defer fake.getAllEmployeesMutex.RUnlock()
 	fake.getEmployeeByIdMutex.RLock()
 	defer fake.getEmployeeByIdMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
