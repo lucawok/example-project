@@ -12,6 +12,7 @@ import (
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . ServiceInterface
 type ServiceInterface interface {
 	CreateEmployees(employees []model.Employee) interface{}
+	CreateEmployee(employee model.Employee) interface{}
 	GetEmployeeById(id string) model.Employee
 	GetAllEmployees() ([]model.Employee, error)
 	DeleteEmployeeById(id string) (*mongo.DeleteResult, error)
@@ -30,16 +31,42 @@ func NewHandler(serviceInterface ServiceInterface) Handler {
 func (handler Handler) CreateEmployeeHandler(c *gin.Context) {
 	var payLoad model.Payload
 	err := c.ShouldBindBodyWith(&payLoad, binding.JSON)
-	if err != nil {
-		fmt.Println(err)
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"errorMessage": "invalid payload",
-		})
+	if err != nil || len(payLoad.Employees) == 0 {
+
+		var employee model.Employee
+		err := c.ShouldBindBodyWith(&employee, binding.JSON)
+		if err != nil {
+			c.AbortWithStatusJSON(400, gin.H{
+				"errorMessage": "Invalid Data",
+			})
+			return
+		}
+		if handler.doUserExist(employee) == true {
+			c.AbortWithStatusJSON(400, gin.H{
+				"errorMessage": "User already exists with this ID",
+			})
+			return
+		}
+		response := handler.ServiceInterface.CreateEmployee(employee)
+		c.JSON(200, response)
+		return
+	} else {
+		response := handler.ServiceInterface.CreateEmployees(payLoad.Employees)
+		c.JSON(200, response)
 		return
 	}
 
-	response := handler.ServiceInterface.CreateEmployees(payLoad.Employees)
-	c.JSON(200, response)
+}
+
+func (handler Handler) doUserExist(emp model.Employee) bool {
+	response := handler.ServiceInterface.GetEmployeeById(emp.ID)
+	fmt.Println(len(response.ID))
+	if len(response.ID) == 0 {
+		return false
+	} else {
+		return true
+	}
+
 }
 
 func (handler Handler) GetEmployeeHandler(c *gin.Context) {

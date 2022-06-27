@@ -57,6 +57,17 @@ type FakeDatabaseInterface struct {
 	updateManyReturnsOnCall map[int]struct {
 		result1 interface{}
 	}
+	UpdateOneStub        func(interface{}) interface{}
+	updateOneMutex       sync.RWMutex
+	updateOneArgsForCall []struct {
+		arg1 interface{}
+	}
+	updateOneReturns struct {
+		result1 interface{}
+	}
+	updateOneReturnsOnCall map[int]struct {
+		result1 interface{}
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -308,6 +319,67 @@ func (fake *FakeDatabaseInterface) UpdateManyReturnsOnCall(i int, result1 interf
 	}{result1}
 }
 
+func (fake *FakeDatabaseInterface) UpdateOne(arg1 interface{}) interface{} {
+	fake.updateOneMutex.Lock()
+	ret, specificReturn := fake.updateOneReturnsOnCall[len(fake.updateOneArgsForCall)]
+	fake.updateOneArgsForCall = append(fake.updateOneArgsForCall, struct {
+		arg1 interface{}
+	}{arg1})
+	stub := fake.UpdateOneStub
+	fakeReturns := fake.updateOneReturns
+	fake.recordInvocation("UpdateOne", []interface{}{arg1})
+	fake.updateOneMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeDatabaseInterface) UpdateOneCallCount() int {
+	fake.updateOneMutex.RLock()
+	defer fake.updateOneMutex.RUnlock()
+	return len(fake.updateOneArgsForCall)
+}
+
+func (fake *FakeDatabaseInterface) UpdateOneCalls(stub func(interface{}) interface{}) {
+	fake.updateOneMutex.Lock()
+	defer fake.updateOneMutex.Unlock()
+	fake.UpdateOneStub = stub
+}
+
+func (fake *FakeDatabaseInterface) UpdateOneArgsForCall(i int) interface{} {
+	fake.updateOneMutex.RLock()
+	defer fake.updateOneMutex.RUnlock()
+	argsForCall := fake.updateOneArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeDatabaseInterface) UpdateOneReturns(result1 interface{}) {
+	fake.updateOneMutex.Lock()
+	defer fake.updateOneMutex.Unlock()
+	fake.UpdateOneStub = nil
+	fake.updateOneReturns = struct {
+		result1 interface{}
+	}{result1}
+}
+
+func (fake *FakeDatabaseInterface) UpdateOneReturnsOnCall(i int, result1 interface{}) {
+	fake.updateOneMutex.Lock()
+	defer fake.updateOneMutex.Unlock()
+	fake.UpdateOneStub = nil
+	if fake.updateOneReturnsOnCall == nil {
+		fake.updateOneReturnsOnCall = make(map[int]struct {
+			result1 interface{}
+		})
+	}
+	fake.updateOneReturnsOnCall[i] = struct {
+		result1 interface{}
+	}{result1}
+}
+
 func (fake *FakeDatabaseInterface) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -319,6 +391,8 @@ func (fake *FakeDatabaseInterface) Invocations() map[string][][]interface{} {
 	defer fake.getByIDMutex.RUnlock()
 	fake.updateManyMutex.RLock()
 	defer fake.updateManyMutex.RUnlock()
+	fake.updateOneMutex.RLock()
+	defer fake.updateOneMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

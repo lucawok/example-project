@@ -8,6 +8,7 @@ import (
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . DatabaseInterface
 type DatabaseInterface interface {
 	UpdateMany(docs []interface{}) interface{}
+	UpdateOne(docs interface{}) interface{}
 	GetByID(id string) model.Employee
 	DeleteByID(id string) (*mongo.DeleteResult, error)
 	GetAll() ([]model.Employee, error)
@@ -46,4 +47,10 @@ func (s EmployeeService) DeleteEmployeeById(id string) (*mongo.DeleteResult, err
 func (s EmployeeService) GetAllEmployees() ([]model.Employee, error) {
 	result, err := s.DbService.GetAll()
 	return result, err
+}
+
+func (s EmployeeService) CreateEmployee(employee model.Employee) interface{} {
+	var emp interface{}
+	emp = employee
+	return s.DbService.UpdateOne(emp)
 }
