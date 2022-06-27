@@ -2,7 +2,6 @@ package handler
 
 import (
 	"example-project/model"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -60,7 +59,6 @@ func (handler Handler) CreateEmployeeHandler(c *gin.Context) {
 
 func (handler Handler) doUserExist(emp model.Employee) bool {
 	response := handler.ServiceInterface.GetEmployeeById(emp.ID)
-	fmt.Println(len(response.ID))
 	if len(response.ID) == 0 {
 		return false
 	} else {
@@ -98,7 +96,6 @@ func (handler Handler) DeleteEmployeeHandler(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Println(response)
 	c.JSON(http.StatusOK, response)
 }
 
