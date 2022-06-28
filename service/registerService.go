@@ -10,6 +10,7 @@ type DatabaseInterface interface {
 	UpdateMany(docs []interface{}) interface{}
 	GetByID(id string) model.Employee
 	DeleteByID(id string) (*mongo.DeleteResult, error)
+	GetAll() ([]model.Employee, error)
 }
 
 type EmployeeService struct {
@@ -40,4 +41,9 @@ func (s EmployeeService) DeleteEmployeeById(id string) (*mongo.DeleteResult, err
 	result, err := s.DbService.DeleteByID(id)
 	return result, err
 
+}
+
+func (s EmployeeService) GetAllEmployees() ([]model.Employee, error) {
+	result, err := s.DbService.GetAll()
+	return result, err
 }

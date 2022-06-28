@@ -15,6 +15,7 @@ type MongoDBInterface interface {
 	FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult
 	InsertMany(ctx context.Context, documents []interface{}, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error)
 	DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
+	Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) (cur *mongo.Cursor, err error)
 }
 
 type Client struct {
@@ -47,12 +48,36 @@ func (c Client) GetByID(id string) model.Employee {
 	}
 	return employee
 }
+
+func (c Client) GetAll() ([]model.Employee, error) {
+	filter := bson.M{}
+	courser, err := c.Employee.Find(context.TODO(), filter)
+
+	var employees []model.Employee
+	if err != nil {
+		return employees, nil
+	}
+	for courser.Next(context.TODO()) {
+		var employee model.Employee
+		err := courser.Decode(&employee)
+		if err != nil {
+			return employees, err
+		}
+		employees = append(employees, employee)
+	}
+	if len(employees) == 0 {
+		noEmployeesError := errors.New("no employees exist")
+		return nil, noEmployeesError
+	}
+	return employees, nil
+
+}
 func (c Client) DeleteByID(id string) (*mongo.DeleteResult, error) {
 	filter := bson.M{"id": id}
-	results, _ := c.Employee.DeleteOne(context.TODO(), filter)
-	deleteError := errors.New("delete count is zero")
+	results, err := c.Employee.DeleteOne(context.TODO(), filter)
 	if results.DeletedCount == 0 {
-		return nil, deleteError
+		NoUserError := errors.New("no user deleted, please check the id")
+		return results, NoUserError
 	}
-	return results, nil
+	return results, err
 }

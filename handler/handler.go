@@ -13,6 +13,7 @@ import (
 type ServiceInterface interface {
 	CreateEmployees(employees []model.Employee) interface{}
 	GetEmployeeById(id string) model.Employee
+	GetAllEmployees() ([]model.Employee, error)
 	DeleteEmployeeById(id string) (*mongo.DeleteResult, error)
 }
 
@@ -66,7 +67,19 @@ func (handler Handler) DeleteEmployeeHandler(c *gin.Context) {
 	response, err := handler.ServiceInterface.DeleteEmployeeById(pathParam)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"errorMessage": "No user found",
+			"errorMessage": err.Error(),
+		})
+		return
+	}
+	fmt.Println(response)
+	c.JSON(http.StatusOK, response)
+}
+
+func (handler Handler) GetAllEmployeesHandler(c *gin.Context) {
+	response, err := handler.ServiceInterface.GetAllEmployees()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"errorMessage": err.Error(),
 		})
 		return
 	}
