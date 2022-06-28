@@ -50,6 +50,19 @@ func (handler Handler) CreateEmployeeHandler(c *gin.Context) {
 		c.JSON(200, response)
 		return
 	} else {
+		var ErrorArray []model.Employee
+		for _, emp := range payLoad.Employees {
+			if handler.doUserExist(emp) {
+				ErrorArray = append(ErrorArray, emp)
+			}
+		}
+		if len(ErrorArray) != 0 {
+			c.AbortWithStatusJSON(400, gin.H{
+				"errorMessage": "The following employees need another ID",
+				"Employees":    ErrorArray,
+			})
+			return
+		}
 		response := handler.ServiceInterface.CreateEmployees(payLoad.Employees)
 		c.JSON(200, response)
 		return
