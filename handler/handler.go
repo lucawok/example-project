@@ -11,7 +11,6 @@ import (
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . ServiceInterface
 type ServiceInterface interface {
 	CreateEmployees(employees []model.Employee) interface{}
-	CreateEmployee(employee model.Employee) interface{}
 	GetEmployeeById(id string) model.Employee
 	GetAllEmployees() ([]model.Employee, error)
 	DeleteEmployeeById(id string) (*mongo.DeleteResult, error)
@@ -40,19 +39,21 @@ func (handler Handler) CreateEmployeeHandler(c *gin.Context) {
 			})
 			return
 		}
-		if handler.doUserExist(employee) == true {
+		if handler.DoUserExist(employee) == true {
 			c.AbortWithStatusJSON(400, gin.H{
 				"errorMessage": "User already exists with this ID",
 			})
 			return
 		}
-		response := handler.ServiceInterface.CreateEmployee(employee)
+		var employees []model.Employee
+		employees = append(employees, employee)
+		response := handler.ServiceInterface.CreateEmployees(employees)
 		c.JSON(200, response)
 		return
 	} else {
 		var ErrorArray []model.Employee
 		for _, emp := range payLoad.Employees {
-			if handler.doUserExist(emp) {
+			if handler.DoUserExist(emp) {
 				ErrorArray = append(ErrorArray, emp)
 			}
 		}
@@ -70,14 +71,13 @@ func (handler Handler) CreateEmployeeHandler(c *gin.Context) {
 
 }
 
-func (handler Handler) doUserExist(emp model.Employee) bool {
+func (handler Handler) DoUserExist(emp model.Employee) bool {
 	response := handler.ServiceInterface.GetEmployeeById(emp.ID)
 	if len(response.ID) == 0 {
 		return false
 	} else {
 		return true
 	}
-
 }
 
 func (handler Handler) GetEmployeeHandler(c *gin.Context) {

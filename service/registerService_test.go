@@ -1,7 +1,6 @@
 package service_test
 
 import (
-	"errors"
 	"example-project/model"
 	"example-project/service"
 	"example-project/service/servicefakes"
@@ -11,7 +10,6 @@ import (
 )
 
 func TestGetEmployeeById(t *testing.T) {
-	fakeDB := &servicefakes.FakeDatabaseInterface{}
 
 	data := model.Employee{
 		ID:        "1",
@@ -19,7 +17,7 @@ func TestGetEmployeeById(t *testing.T) {
 		LastName:  "kock",
 		Email:     "jon@gmail.com",
 	}
-
+	fakeDB := &servicefakes.FakeDatabaseInterface{}
 	fakeDB.GetByIDReturns(data)
 
 	serviceInstance := service.NewEmployeeService(fakeDB)
@@ -29,11 +27,9 @@ func TestGetEmployeeById(t *testing.T) {
 }
 
 func TestDeleteEmployeeById(t *testing.T) {
-	fakeDB := &servicefakes.FakeDatabaseInterface{}
-
-	noUserError := errors.New("no user deleted, please check the id")
 	data := &mongo.DeleteResult{DeletedCount: 0}
-	fakeDB.DeleteByIDReturns(&mongo.DeleteResult{DeletedCount: 0}, noUserError)
+	fakeDB := &servicefakes.FakeDatabaseInterface{}
+	fakeDB.DeleteByIDReturns(data, nil)
 	serviceInstance := service.NewEmployeeService(fakeDB)
 	actual, err := serviceInstance.DeleteEmployeeById("3")
 	assert.Equal(t, data, actual, err)
@@ -53,4 +49,28 @@ func TestGetAllEmployees(t *testing.T) {
 	serviceInstance := service.NewEmployeeService(fakeDB)
 	actual, err := serviceInstance.GetAllEmployees()
 	assert.Equal(t, dataArray, actual, err)
+}
+
+func TestCreateEmployees(t *testing.T) {
+	fakeDB := &servicefakes.FakeDatabaseInterface{}
+	var fakeEmployees []model.Employee
+	emp1 := model.Employee{ID: "1", FirstName: "Test", LastName: "Tester", Email: "example@gmail.com"}
+	emp2 := model.Employee{ID: "2", FirstName: "Thomas", LastName: "Crock", Email: "example@gmx.de"}
+	fakeEmployees = append(fakeEmployees, emp1)
+	fakeEmployees = append(fakeEmployees, emp2)
+	fakeDB.UpdateManyReturns(fakeEmployees)
+	serviceInstance := service.NewEmployeeService(fakeDB)
+	actual := serviceInstance.CreateEmployees(fakeEmployees)
+	assert.Equal(t, fakeEmployees, actual)
+}
+
+func TestCreateOneEmployees(t *testing.T) {
+	fakeDB := &servicefakes.FakeDatabaseInterface{}
+	var fakeEmployees []model.Employee
+	emp1 := model.Employee{ID: "1", FirstName: "Test", LastName: "Tester", Email: "example@gmail.com"}
+	fakeEmployees = append(fakeEmployees, emp1)
+	fakeDB.UpdateOneReturns(fakeEmployees)
+	serviceInstance := service.NewEmployeeService(fakeDB)
+	actual := serviceInstance.CreateEmployees(fakeEmployees)
+	assert.Equal(t, fakeEmployees, actual)
 }

@@ -27,11 +27,16 @@ func NewEmployeeService(dbInterface DatabaseInterface) EmployeeService {
 func (s EmployeeService) CreateEmployees(employees []model.Employee) interface{} {
 
 	var emp []interface{}
-	for _, employee := range employees {
-		emp = append(emp, employee)
+	if len(employees) > 1 {
+		for _, employee := range employees {
+			emp = append(emp, employee)
 
+		}
+		return s.DbService.UpdateMany(emp)
+	} else {
+		return s.DbService.UpdateOne(employees[0])
 	}
-	return s.DbService.UpdateMany(emp)
+
 }
 
 func (s EmployeeService) GetEmployeeById(id string) model.Employee {
@@ -47,10 +52,4 @@ func (s EmployeeService) DeleteEmployeeById(id string) (*mongo.DeleteResult, err
 func (s EmployeeService) GetAllEmployees() ([]model.Employee, error) {
 	result, err := s.DbService.GetAll()
 	return result, err
-}
-
-func (s EmployeeService) CreateEmployee(employee model.Employee) interface{} {
-	var emp interface{}
-	emp = employee
-	return s.DbService.UpdateOne(emp)
 }

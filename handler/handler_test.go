@@ -1,6 +1,8 @@
 package handler_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"example-project/handler"
 	"example-project/handler/handlerfakes"
@@ -125,4 +127,240 @@ func TestGetAllEmployeesHandler_Return_invalid_status_code(t *testing.T) {
 	handlerInstance := handler.NewHandler(fakeService)
 	handlerInstance.GetAllEmployeesHandler(fakeContext)
 	assert.Equal(t, 400, responseRecorder.Code)
+}
+
+func TestCreateEmployeesHandler_SingleEmployee_valid_status_code(t *testing.T) {
+
+	var jsonPayload = `
+		{
+		"id": "100",
+		"first_name": "Test",
+		"last_name": "Tester",
+		"email": "tester@example.com"
+		}
+	`
+	var employeePayload model.Employee
+	json.Unmarshal([]byte(jsonPayload), &employeePayload)
+	body := bytes.NewBufferString(jsonPayload)
+	responseRecorder := httptest.NewRecorder()
+	fakeContext, _ := gin.CreateTestContext(responseRecorder)
+	fakeContext.Request = httptest.NewRequest("POST", "http://localhost:9090/employee/create", body)
+	fakeService := &handlerfakes.FakeServiceInterface{}
+	var fakeEmployees []model.Employee
+	var fakeEmployee model.Employee
+	fakeEmployee.ID = "100"
+	fakeEmployee.LastName = "Tester"
+	fakeEmployee.FirstName = "Test"
+	fakeEmployee.Email = "tester@example.com"
+	fakeEmployees = append(fakeEmployees, fakeEmployee)
+	fakeService.CreateEmployeesReturns(fakeEmployees)
+	responseRecorder.Body = body
+
+	handlerInstance := handler.NewHandler(fakeService)
+	handlerInstance.CreateEmployeeHandler(fakeContext)
+	assert.Equal(t, 200, responseRecorder.Code)
+}
+
+func TestCreateEmployeesHandler_SingleEmployee_invalid_status_code(t *testing.T) {
+
+	var jsonPayload = `
+		{
+		"id": "100",
+		"first_name": "Test",
+		"last_name: "Tester",
+		"email": "tester@example.com"
+		}
+	`
+	var employeePayload model.Employee
+	json.Unmarshal([]byte(jsonPayload), &employeePayload)
+	body := bytes.NewBufferString(jsonPayload)
+	responseRecorder := httptest.NewRecorder()
+	fakeContext, _ := gin.CreateTestContext(responseRecorder)
+	fakeContext.Request = httptest.NewRequest("POST", "http://localhost:9090/employee/create", body)
+	fakeService := &handlerfakes.FakeServiceInterface{}
+	var fakeEmployees []model.Employee
+	var fakeEmployee model.Employee
+	fakeEmployee.ID = "100"
+	fakeEmployee.LastName = "Tester"
+	fakeEmployee.FirstName = "Test"
+	fakeEmployee.Email = "tester@example.com"
+	fakeEmployees = append(fakeEmployees, fakeEmployee)
+	fakeService.CreateEmployeesReturns(fakeEmployees)
+	responseRecorder.Body = body
+
+	handlerInstance := handler.NewHandler(fakeService)
+	handlerInstance.CreateEmployeeHandler(fakeContext)
+	assert.Equal(t, 400, responseRecorder.Code)
+}
+
+func TestCreateEmployeesHandler_SingleEmployee_user_exists(t *testing.T) {
+
+	var jsonPayload = `
+		{
+		"id": "100",
+		"first_name": "Test",
+		"last_name": "Tester",
+		"email": "tester@example.com"
+		}
+	`
+	var employeePayload model.Payload
+	json.Unmarshal([]byte(jsonPayload), &employeePayload)
+	body := bytes.NewBufferString(jsonPayload)
+	responseRecorder := httptest.NewRecorder()
+	fakeContext, _ := gin.CreateTestContext(responseRecorder)
+	fakeContext.Request = httptest.NewRequest("POST", "http://localhost:9090/employee/create", body)
+	fakeService := &handlerfakes.FakeServiceInterface{}
+	var fakeEmployees []model.Employee
+	fakeEmployee1 := model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
+	fakeEmployees = append(fakeEmployees, fakeEmployee1)
+	fakeService.CreateEmployeesReturns(fakeEmployees)
+	responseRecorder.Body = body
+
+	handlerInstance := handler.NewHandler(fakeService)
+	fakeService.GetEmployeeByIdReturns(model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"})
+
+	handlerInstance.CreateEmployeeHandler(fakeContext)
+
+	assert.Equal(t, 400, responseRecorder.Code)
+}
+
+func TestCreateEmployeesHandler_MultiEmployee_valid_status_code(t *testing.T) {
+
+	var jsonPayload = `
+		{
+		"employees": [
+			{
+			"id": "100",
+			"first_name": "Test",
+			"last_name": "Tester",
+			"email": "tester@example.com"
+			},
+			{
+			"id": "200",
+			"first_name": "Test",
+			"last_name": "Tester",
+			"email": "tester@example.com"
+			}
+		]	
+	}
+	`
+	var employeePayload model.Payload
+	json.Unmarshal([]byte(jsonPayload), &employeePayload)
+	body := bytes.NewBufferString(jsonPayload)
+	responseRecorder := httptest.NewRecorder()
+	fakeContext, _ := gin.CreateTestContext(responseRecorder)
+	fakeContext.Request = httptest.NewRequest("POST", "http://localhost:9090/employee/create", body)
+	fakeService := &handlerfakes.FakeServiceInterface{}
+	var fakeEmployees []model.Employee
+	fakeEmployee1 := model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
+	fakeEmployee2 := model.Employee{ID: "200", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
+	fakeEmployees = append(fakeEmployees, fakeEmployee1)
+	fakeEmployees = append(fakeEmployees, fakeEmployee2)
+	fakeService.CreateEmployeesReturns(fakeEmployees)
+	responseRecorder.Body = body
+
+	handlerInstance := handler.NewHandler(fakeService)
+	handlerInstance.CreateEmployeeHandler(fakeContext)
+	assert.Equal(t, 200, responseRecorder.Code)
+}
+
+func TestCreateEmployeesHandler_MultiEmployee_invalid_data(t *testing.T) {
+
+	var jsonPayload = `
+		{
+		"employees": [
+			{
+			"id": "100",
+			"first_name": "Test",
+			"last_name": "Tester",
+			"email": "tester@example.com"
+			},
+			{
+			"id": "200",
+			"first_name": "Test",
+			"last_name": "Tester",
+			"email": "tester@example.com"
+			
+		]	
+	}
+	`
+	var employeePayload model.Payload
+	json.Unmarshal([]byte(jsonPayload), &employeePayload)
+	body := bytes.NewBufferString(jsonPayload)
+	responseRecorder := httptest.NewRecorder()
+	fakeContext, _ := gin.CreateTestContext(responseRecorder)
+	fakeContext.Request = httptest.NewRequest("POST", "http://localhost:9090/employee/create", body)
+	fakeService := &handlerfakes.FakeServiceInterface{}
+	var fakeEmployees []model.Employee
+	fakeEmployee1 := model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
+	fakeEmployee2 := model.Employee{ID: "200", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
+	fakeEmployees = append(fakeEmployees, fakeEmployee1)
+	fakeEmployees = append(fakeEmployees, fakeEmployee2)
+	fakeService.CreateEmployeesReturns(fakeEmployees)
+	responseRecorder.Body = body
+
+	handlerInstance := handler.NewHandler(fakeService)
+	handlerInstance.CreateEmployeeHandler(fakeContext)
+
+	assert.Equal(t, 400, responseRecorder.Code)
+}
+
+func TestCreateEmployeesHandler_MultiEmployee_user_exists(t *testing.T) {
+
+	var jsonPayload = `
+		{
+		"employees": [
+			{
+			"id": "100",
+			"first_name": "Test",
+			"last_name": "Tester",
+			"email": "tester@example.com"
+			},
+			{
+			"id": "200",
+			"first_name": "Test",
+			"last_name": "Tester",
+			"email": "tester@example.com"
+			}
+		]	
+	}
+	`
+	var employeePayload model.Payload
+	json.Unmarshal([]byte(jsonPayload), &employeePayload)
+	body := bytes.NewBufferString(jsonPayload)
+	responseRecorder := httptest.NewRecorder()
+	fakeContext, _ := gin.CreateTestContext(responseRecorder)
+	fakeContext.Request = httptest.NewRequest("POST", "http://localhost:9090/employee/create", body)
+	fakeService := &handlerfakes.FakeServiceInterface{}
+	var fakeEmployees []model.Employee
+	fakeEmployee1 := model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
+	fakeEmployee2 := model.Employee{ID: "200", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
+	fakeEmployees = append(fakeEmployees, fakeEmployee1)
+	fakeEmployees = append(fakeEmployees, fakeEmployee2)
+	fakeService.CreateEmployeesReturns(fakeEmployees)
+	responseRecorder.Body = body
+
+	handlerInstance := handler.NewHandler(fakeService)
+	fakeService.GetEmployeeByIdReturns(model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"})
+	handlerInstance.CreateEmployeeHandler(fakeContext)
+
+	assert.Equal(t, 400, responseRecorder.Code)
+}
+
+func TestDoUserExist_true(t *testing.T) {
+	fakeService := &handlerfakes.FakeServiceInterface{}
+	emp := model.Employee{ID: "99", FirstName: "Test", LastName: "Tester", Email: "example@test.com"}
+	fakeService.GetEmployeeByIdReturns(emp)
+	handlerInstance := handler.NewHandler(fakeService)
+	handlerResult := handlerInstance.DoUserExist(emp)
+	assert.Equal(t, true, handlerResult)
+}
+
+func TestDoUserExist_false(t *testing.T) {
+	fakeService := &handlerfakes.FakeServiceInterface{}
+	emp := model.Employee{}
+	fakeService.GetEmployeeByIdReturns(emp)
+	handlerInstance := handler.NewHandler(fakeService)
+	handlerResult := handlerInstance.DoUserExist(emp)
+	assert.Equal(t, false, handlerResult)
 }
