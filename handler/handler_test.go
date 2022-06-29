@@ -363,9 +363,11 @@ func TestDoUserExist_true_duplication(t *testing.T) {
 func TestDoUserExist_false(t *testing.T) {
 	fakeService := &handlerfakes.FakeServiceInterface{}
 	fakeEmployees := []model.Employee{
-		model.Employee{},
+		model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
+		model.Employee{ID: "200", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
 	}
-	fakeService.GetEmployeeByIdReturns(fakeEmployees[0])
+	var emptyEmployee model.Employee
+	fakeService.GetEmployeeByIdReturns(emptyEmployee)
 	handlerInstance := handler.NewHandler(fakeService)
 	boolResult, _ := handlerInstance.DoUserExist(fakeEmployees)
 	assert.Equal(t, false, boolResult)
