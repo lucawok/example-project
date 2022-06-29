@@ -39,25 +39,22 @@ func (handler Handler) CreateEmployeeHandler(c *gin.Context) {
 			})
 			return
 		}
-		if handler.DoUserExist(employee) == true {
+		var employees []model.Employee
+		employees = append(employees, employee)
+		userErrorCheck, _ := handler.DoUserExist(employees)
+		if userErrorCheck == true {
 			c.AbortWithStatusJSON(400, gin.H{
 				"errorMessage": "User already exists with this ID",
 			})
 			return
 		}
-		var employees []model.Employee
-		employees = append(employees, employee)
+
 		response := handler.ServiceInterface.CreateEmployees(employees)
 		c.JSON(200, response)
 		return
 	} else {
-		var ErrorArray []model.Employee
-		for _, emp := range payLoad.Employees {
-			if handler.DoUserExist(emp) {
-				ErrorArray = append(ErrorArray, emp)
-			}
-		}
-		if len(ErrorArray) != 0 {
+		userErrorCheck, ErrorArray := handler.DoUserExist(payLoad.Employees)
+		if userErrorCheck == true {
 			c.AbortWithStatusJSON(400, gin.H{
 				"errorMessage": "The following employees need another ID",
 				"Employees":    ErrorArray,
@@ -71,12 +68,31 @@ func (handler Handler) CreateEmployeeHandler(c *gin.Context) {
 
 }
 
-func (handler Handler) DoUserExist(emp model.Employee) bool {
-	response := handler.ServiceInterface.GetEmployeeById(emp.ID)
-	if len(response.ID) == 0 {
-		return false
+func (handler Handler) DoUserExist(emp []model.Employee) (bool, []model.Employee) {
+	var idList []string
+	var errorEmployees []model.Employee
+
+	for _, employee := range emp {
+		response := handler.ServiceInterface.GetEmployeeById(employee.ID)
+		if len(response.ID) != 0 {
+			errorEmployees = append(errorEmployees, employee)
+		} else {
+			idList = append(idList, employee.ID)
+			var idCount int = 0
+			for _, id := range idList {
+				if id == employee.ID {
+					idCount++
+				}
+			}
+			if idCount >= 2 {
+				errorEmployees = append(errorEmployees, employee)
+			}
+		}
+	}
+	if len(errorEmployees) != 0 {
+		return true, errorEmployees
 	} else {
-		return true
+		return false, nil
 	}
 }
 

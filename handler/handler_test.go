@@ -146,13 +146,9 @@ func TestCreateEmployeesHandler_SingleEmployee_valid_status_code(t *testing.T) {
 	fakeContext, _ := gin.CreateTestContext(responseRecorder)
 	fakeContext.Request = httptest.NewRequest("POST", "http://localhost:9090/employee/create", body)
 	fakeService := &handlerfakes.FakeServiceInterface{}
-	var fakeEmployees []model.Employee
-	var fakeEmployee model.Employee
-	fakeEmployee.ID = "100"
-	fakeEmployee.LastName = "Tester"
-	fakeEmployee.FirstName = "Test"
-	fakeEmployee.Email = "tester@example.com"
-	fakeEmployees = append(fakeEmployees, fakeEmployee)
+	fakeEmployees := []model.Employee{
+		model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
+	}
 	fakeService.CreateEmployeesReturns(fakeEmployees)
 	responseRecorder.Body = body
 
@@ -178,13 +174,9 @@ func TestCreateEmployeesHandler_SingleEmployee_invalid_status_code(t *testing.T)
 	fakeContext, _ := gin.CreateTestContext(responseRecorder)
 	fakeContext.Request = httptest.NewRequest("POST", "http://localhost:9090/employee/create", body)
 	fakeService := &handlerfakes.FakeServiceInterface{}
-	var fakeEmployees []model.Employee
-	var fakeEmployee model.Employee
-	fakeEmployee.ID = "100"
-	fakeEmployee.LastName = "Tester"
-	fakeEmployee.FirstName = "Test"
-	fakeEmployee.Email = "tester@example.com"
-	fakeEmployees = append(fakeEmployees, fakeEmployee)
+	fakeEmployees := []model.Employee{
+		model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
+	}
 	fakeService.CreateEmployeesReturns(fakeEmployees)
 	responseRecorder.Body = body
 
@@ -210,9 +202,9 @@ func TestCreateEmployeesHandler_SingleEmployee_user_exists(t *testing.T) {
 	fakeContext, _ := gin.CreateTestContext(responseRecorder)
 	fakeContext.Request = httptest.NewRequest("POST", "http://localhost:9090/employee/create", body)
 	fakeService := &handlerfakes.FakeServiceInterface{}
-	var fakeEmployees []model.Employee
-	fakeEmployee1 := model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
-	fakeEmployees = append(fakeEmployees, fakeEmployee1)
+	fakeEmployees := []model.Employee{
+		model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
+	}
 	fakeService.CreateEmployeesReturns(fakeEmployees)
 	responseRecorder.Body = body
 
@@ -251,11 +243,10 @@ func TestCreateEmployeesHandler_MultiEmployee_valid_status_code(t *testing.T) {
 	fakeContext, _ := gin.CreateTestContext(responseRecorder)
 	fakeContext.Request = httptest.NewRequest("POST", "http://localhost:9090/employee/create", body)
 	fakeService := &handlerfakes.FakeServiceInterface{}
-	var fakeEmployees []model.Employee
-	fakeEmployee1 := model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
-	fakeEmployee2 := model.Employee{ID: "200", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
-	fakeEmployees = append(fakeEmployees, fakeEmployee1)
-	fakeEmployees = append(fakeEmployees, fakeEmployee2)
+	fakeEmployees := []model.Employee{
+		model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
+		model.Employee{ID: "200", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
+	}
 	fakeService.CreateEmployeesReturns(fakeEmployees)
 	responseRecorder.Body = body
 
@@ -291,11 +282,10 @@ func TestCreateEmployeesHandler_MultiEmployee_invalid_data(t *testing.T) {
 	fakeContext, _ := gin.CreateTestContext(responseRecorder)
 	fakeContext.Request = httptest.NewRequest("POST", "http://localhost:9090/employee/create", body)
 	fakeService := &handlerfakes.FakeServiceInterface{}
-	var fakeEmployees []model.Employee
-	fakeEmployee1 := model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
-	fakeEmployee2 := model.Employee{ID: "200", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
-	fakeEmployees = append(fakeEmployees, fakeEmployee1)
-	fakeEmployees = append(fakeEmployees, fakeEmployee2)
+	fakeEmployees := []model.Employee{
+		model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
+		model.Employee{ID: "200", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
+	}
 	fakeService.CreateEmployeesReturns(fakeEmployees)
 	responseRecorder.Body = body
 
@@ -332,11 +322,10 @@ func TestCreateEmployeesHandler_MultiEmployee_user_exists(t *testing.T) {
 	fakeContext, _ := gin.CreateTestContext(responseRecorder)
 	fakeContext.Request = httptest.NewRequest("POST", "http://localhost:9090/employee/create", body)
 	fakeService := &handlerfakes.FakeServiceInterface{}
-	var fakeEmployees []model.Employee
-	fakeEmployee1 := model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
-	fakeEmployee2 := model.Employee{ID: "200", FirstName: "Test", LastName: "Tester", Email: "tester@example.com"}
-	fakeEmployees = append(fakeEmployees, fakeEmployee1)
-	fakeEmployees = append(fakeEmployees, fakeEmployee2)
+	fakeEmployees := []model.Employee{
+		model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
+		model.Employee{ID: "200", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
+	}
 	fakeService.CreateEmployeesReturns(fakeEmployees)
 	responseRecorder.Body = body
 
@@ -347,20 +336,37 @@ func TestCreateEmployeesHandler_MultiEmployee_user_exists(t *testing.T) {
 	assert.Equal(t, 400, responseRecorder.Code)
 }
 
-func TestDoUserExist_true(t *testing.T) {
+func TestDoUserExist_true_already_exists(t *testing.T) {
 	fakeService := &handlerfakes.FakeServiceInterface{}
-	emp := model.Employee{ID: "99", FirstName: "Test", LastName: "Tester", Email: "example@test.com"}
-	fakeService.GetEmployeeByIdReturns(emp)
+	fakeEmployees := []model.Employee{
+		model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
+	}
+	fakeService.GetEmployeeByIdReturns(fakeEmployees[0])
 	handlerInstance := handler.NewHandler(fakeService)
-	handlerResult := handlerInstance.DoUserExist(emp)
-	assert.Equal(t, true, handlerResult)
+	boolResult, _ := handlerInstance.DoUserExist(fakeEmployees)
+	assert.Equal(t, true, boolResult)
+}
+
+func TestDoUserExist_true_duplication(t *testing.T) {
+	fakeService := &handlerfakes.FakeServiceInterface{}
+	fakeEmployees := []model.Employee{
+		model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
+		model.Employee{ID: "100", FirstName: "Test", LastName: "Tester", Email: "tester@gmail.com"},
+	}
+	var emptyEmployee model.Employee
+	fakeService.GetEmployeeByIdReturns(emptyEmployee)
+	handlerInstance := handler.NewHandler(fakeService)
+	boolResult, _ := handlerInstance.DoUserExist(fakeEmployees)
+	assert.Equal(t, true, boolResult)
 }
 
 func TestDoUserExist_false(t *testing.T) {
 	fakeService := &handlerfakes.FakeServiceInterface{}
-	emp := model.Employee{}
-	fakeService.GetEmployeeByIdReturns(emp)
+	fakeEmployees := []model.Employee{
+		model.Employee{},
+	}
+	fakeService.GetEmployeeByIdReturns(fakeEmployees[0])
 	handlerInstance := handler.NewHandler(fakeService)
-	handlerResult := handlerInstance.DoUserExist(emp)
-	assert.Equal(t, false, handlerResult)
+	boolResult, _ := handlerInstance.DoUserExist(fakeEmployees)
+	assert.Equal(t, false, boolResult)
 }
