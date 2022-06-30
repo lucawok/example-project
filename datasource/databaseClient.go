@@ -98,7 +98,14 @@ func (c Client) GetPaginated(page int, limit int) (model.PaginatedPayload, error
 	var maxPages = float64(skipMax) / float64(limit64)
 	maxPages = math.Ceil(maxPages)
 	paginatedPayload.PageLimit = int(maxPages)
-	fmt.Println(maxPages)
+	if page == 0 || math.Signbit(float64(page)) {
+		invalidPageNumber := errors.New("invalid page number, page number can't be zero or negative")
+		return paginatedPayload, invalidPageNumber
+	}
+	if limit == 0 || math.Signbit(float64(limit)) {
+		invalidPageNumber := errors.New("invalid limit, limit can't be zero or negative")
+		return paginatedPayload, invalidPageNumber
+	}
 	if maxPages == 0 {
 		formattedError := fmt.Sprintf("your page limit is too high. please reduce it to: %v", skipMax)
 		return paginatedPayload, errors.New(formattedError)
@@ -106,10 +113,6 @@ func (c Client) GetPaginated(page int, limit int) (model.PaginatedPayload, error
 	if page > int(maxPages) {
 		outOfRange := errors.New("page limit reached, please reduce the page number")
 		return paginatedPayload, outOfRange
-	}
-	if page == 0 {
-		invalidPageNumber := errors.New("invalid page number, page number can't be zero")
-		return paginatedPayload, invalidPageNumber
 	}
 	pageSet := (page - 1) * limit
 	findOptions.SetLimit(limit64)
