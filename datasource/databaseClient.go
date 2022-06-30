@@ -88,7 +88,7 @@ func (c Client) GetPaginated(page int, limit int) ([]model.Employee, error) {
 	findOptions.SetSort(bson.D{{"id", 1}})
 	limit64 := int64(limit)
 	if page == 0 {
-		invalidPageNumber := errors.New("invalid page number, page number can be zero")
+		invalidPageNumber := errors.New("invalid page number, page number can't be zero")
 		return nil, invalidPageNumber
 	}
 	pageSet := (page - 1) * limit
