@@ -95,8 +95,8 @@ func (c Client) GetPaginated(page int, limit int) (model.PaginatedPayload, error
 	findOptions := options.Find()
 	findOptions.SetSort(bson.D{{"id", 1}})
 	limit64 := int64(limit)
-	var maxPages = float64(skipMax / limit64)
-	maxPages = math.Floor(maxPages)
+	var maxPages = float64(skipMax) / float64(limit64)
+	maxPages = math.Ceil(maxPages)
 	paginatedPayload.PageLimit = int(maxPages)
 	fmt.Println(maxPages)
 	if maxPages == 0 {
