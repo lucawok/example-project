@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"example-project/model"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"math"
 )
 
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . MongoDBInterface
@@ -17,6 +19,7 @@ type MongoDBInterface interface {
 	DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 	Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) (cur *mongo.Cursor, err error)
 	InsertOne(ctx context.Context, filter interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error)
+	CountDocuments(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error)
 }
 
 type Client struct {
@@ -82,37 +85,55 @@ func (c Client) GetAll() ([]model.Employee, error) {
 
 }
 
-func (c Client) GetPaginated(page int, limit int) ([]model.Employee, error) {
-	filter := bson.M{}
+func (c Client) GetPaginated(page int, limit int) (model.PaginatedPayload, error) {
+	var paginatedPayload model.PaginatedPayload
+	skipMax, er := c.Employee.CountDocuments(context.TODO(), bson.D{})
+	if er != nil {
+		return model.PaginatedPayload{}, errors.New("error at counting documents")
+	}
+
 	findOptions := options.Find()
 	findOptions.SetSort(bson.D{{"id", 1}})
 	limit64 := int64(limit)
+	var maxPages = float64(skipMax / limit64)
+	maxPages = math.Floor(maxPages)
+	paginatedPayload.PageLimit = int(maxPages)
+	fmt.Println(maxPages)
+	if maxPages == 0 {
+		formattedError := fmt.Sprintf("your page limit is too high. please reduce it to: %v", skipMax)
+		return paginatedPayload, errors.New(formattedError)
+	}
+	if page > int(maxPages) {
+		outOfRange := errors.New("page limit reached, please reduce the page number")
+		return paginatedPayload, outOfRange
+	}
 	if page == 0 {
 		invalidPageNumber := errors.New("invalid page number, page number can't be zero")
-		return nil, invalidPageNumber
+		return paginatedPayload, invalidPageNumber
 	}
 	pageSet := (page - 1) * limit
 	findOptions.SetLimit(limit64)
 	findOptions.SetSkip(int64(pageSet))
-	courser, err := c.Employee.Find(context.TODO(), filter, findOptions)
+	courser, err := c.Employee.Find(context.TODO(), bson.D{}, findOptions)
 
 	var employees []model.Employee
 	if err != nil {
-		return employees, nil
+		return paginatedPayload, err
 	}
 	for courser.Next(context.TODO()) {
 		var employee model.Employee
 		err := courser.Decode(&employee)
 		if err != nil {
-			return employees, err
+			return paginatedPayload, err
 		}
 		employees = append(employees, employee)
 	}
 	if len(employees) == 0 {
 		noEmployeesError := errors.New("no employees exist")
-		return nil, noEmployeesError
+		return paginatedPayload, noEmployeesError
 	}
-	return employees, nil
+	paginatedPayload.Employees = employees
+	return paginatedPayload, nil
 
 }
 

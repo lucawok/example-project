@@ -12,7 +12,7 @@ type DatabaseInterface interface {
 	GetByID(id string) model.Employee
 	DeleteByID(id string) (*mongo.DeleteResult, error)
 	GetAll() ([]model.Employee, error)
-	GetPaginated(int, int) ([]model.Employee, error)
+	GetPaginated(int, int) (model.PaginatedPayload, error)
 }
 
 type EmployeeService struct {
@@ -55,7 +55,7 @@ func (s EmployeeService) GetAllEmployees() ([]model.Employee, error) {
 	return result, err
 }
 
-func (s EmployeeService) GetPaginatedEmployees(page int, limit int) ([]model.Employee, error) {
+func (s EmployeeService) GetPaginatedEmployees(page int, limit int) (model.PaginatedPayload, error) {
 	result, err := s.DbService.GetPaginated(page, limit)
 	return result, err
 }

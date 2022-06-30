@@ -15,7 +15,7 @@ type ServiceInterface interface {
 	GetEmployeeById(id string) model.Employee
 	GetAllEmployees() ([]model.Employee, error)
 	DeleteEmployeeById(id string) (*mongo.DeleteResult, error)
-	GetPaginatedEmployees(page int, limit int) ([]model.Employee, error)
+	GetPaginatedEmployees(page int, limit int) (model.PaginatedPayload, error)
 }
 
 type Handler struct {

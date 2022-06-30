@@ -57,18 +57,18 @@ type FakeServiceInterface struct {
 	getEmployeeByIdReturnsOnCall map[int]struct {
 		result1 model.Employee
 	}
-	GetPaginatedEmployeesStub        func(int, int) ([]model.Employee, error)
+	GetPaginatedEmployeesStub        func(int, int) (model.PaginatedPayload, error)
 	getPaginatedEmployeesMutex       sync.RWMutex
 	getPaginatedEmployeesArgsForCall []struct {
 		arg1 int
 		arg2 int
 	}
 	getPaginatedEmployeesReturns struct {
-		result1 []model.Employee
+		result1 model.PaginatedPayload
 		result2 error
 	}
 	getPaginatedEmployeesReturnsOnCall map[int]struct {
-		result1 []model.Employee
+		result1 model.PaginatedPayload
 		result2 error
 	}
 	invocations      map[string][][]interface{}
@@ -322,7 +322,7 @@ func (fake *FakeServiceInterface) GetEmployeeByIdReturnsOnCall(i int, result1 mo
 	}{result1}
 }
 
-func (fake *FakeServiceInterface) GetPaginatedEmployees(arg1 int, arg2 int) ([]model.Employee, error) {
+func (fake *FakeServiceInterface) GetPaginatedEmployees(arg1 int, arg2 int) (model.PaginatedPayload, error) {
 	fake.getPaginatedEmployeesMutex.Lock()
 	ret, specificReturn := fake.getPaginatedEmployeesReturnsOnCall[len(fake.getPaginatedEmployeesArgsForCall)]
 	fake.getPaginatedEmployeesArgsForCall = append(fake.getPaginatedEmployeesArgsForCall, struct {
@@ -348,7 +348,7 @@ func (fake *FakeServiceInterface) GetPaginatedEmployeesCallCount() int {
 	return len(fake.getPaginatedEmployeesArgsForCall)
 }
 
-func (fake *FakeServiceInterface) GetPaginatedEmployeesCalls(stub func(int, int) ([]model.Employee, error)) {
+func (fake *FakeServiceInterface) GetPaginatedEmployeesCalls(stub func(int, int) (model.PaginatedPayload, error)) {
 	fake.getPaginatedEmployeesMutex.Lock()
 	defer fake.getPaginatedEmployeesMutex.Unlock()
 	fake.GetPaginatedEmployeesStub = stub
@@ -361,28 +361,28 @@ func (fake *FakeServiceInterface) GetPaginatedEmployeesArgsForCall(i int) (int, 
 	return argsForCall.arg1, argsForCall.arg2
 }
 
-func (fake *FakeServiceInterface) GetPaginatedEmployeesReturns(result1 []model.Employee, result2 error) {
+func (fake *FakeServiceInterface) GetPaginatedEmployeesReturns(result1 model.PaginatedPayload, result2 error) {
 	fake.getPaginatedEmployeesMutex.Lock()
 	defer fake.getPaginatedEmployeesMutex.Unlock()
 	fake.GetPaginatedEmployeesStub = nil
 	fake.getPaginatedEmployeesReturns = struct {
-		result1 []model.Employee
+		result1 model.PaginatedPayload
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeServiceInterface) GetPaginatedEmployeesReturnsOnCall(i int, result1 []model.Employee, result2 error) {
+func (fake *FakeServiceInterface) GetPaginatedEmployeesReturnsOnCall(i int, result1 model.PaginatedPayload, result2 error) {
 	fake.getPaginatedEmployeesMutex.Lock()
 	defer fake.getPaginatedEmployeesMutex.Unlock()
 	fake.GetPaginatedEmployeesStub = nil
 	if fake.getPaginatedEmployeesReturnsOnCall == nil {
 		fake.getPaginatedEmployeesReturnsOnCall = make(map[int]struct {
-			result1 []model.Employee
+			result1 model.PaginatedPayload
 			result2 error
 		})
 	}
 	fake.getPaginatedEmployeesReturnsOnCall[i] = struct {
-		result1 []model.Employee
+		result1 model.PaginatedPayload
 		result2 error
 	}{result1, result2}
 }
