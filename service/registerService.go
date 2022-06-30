@@ -8,6 +8,7 @@ import (
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . DatabaseInterface
 type DatabaseInterface interface {
 	UpdateMany(docs []interface{}) interface{}
+	UpdateOne(docs interface{}) interface{}
 	GetByID(id string) model.Employee
 	DeleteByID(id string) (*mongo.DeleteResult, error)
 	GetAll() ([]model.Employee, error)
@@ -26,11 +27,16 @@ func NewEmployeeService(dbInterface DatabaseInterface) EmployeeService {
 func (s EmployeeService) CreateEmployees(employees []model.Employee) interface{} {
 
 	var emp []interface{}
-	for _, employee := range employees {
-		emp = append(emp, employee)
+	if len(employees) > 1 {
+		for _, employee := range employees {
+			emp = append(emp, employee)
 
+		}
+		return s.DbService.UpdateMany(emp)
+	} else {
+		return s.DbService.UpdateOne(employees[0])
 	}
-	return s.DbService.UpdateMany(emp)
+
 }
 
 func (s EmployeeService) GetEmployeeById(id string) model.Employee {

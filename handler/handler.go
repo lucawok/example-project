@@ -2,7 +2,6 @@ package handler
 
 import (
 	"example-project/model"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -30,16 +29,71 @@ func NewHandler(serviceInterface ServiceInterface) Handler {
 func (handler Handler) CreateEmployeeHandler(c *gin.Context) {
 	var payLoad model.Payload
 	err := c.ShouldBindBodyWith(&payLoad, binding.JSON)
-	if err != nil {
-		fmt.Println(err)
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"errorMessage": "invalid payload",
-		})
+	if err != nil || len(payLoad.Employees) == 0 {
+
+		var employee model.Employee
+		err := c.ShouldBindBodyWith(&employee, binding.JSON)
+		if err != nil {
+			c.AbortWithStatusJSON(400, gin.H{
+				"errorMessage": "Invalid Data",
+			})
+			return
+		}
+		var employees []model.Employee
+		employees = append(employees, employee)
+		userErrorCheck, _ := handler.DoUserExist(employees)
+		if userErrorCheck == true {
+			c.AbortWithStatusJSON(400, gin.H{
+				"errorMessage": "User already exists with this ID",
+			})
+			return
+		}
+
+		response := handler.ServiceInterface.CreateEmployees(employees)
+		c.JSON(200, response)
+		return
+	} else {
+		userErrorCheck, ErrorArray := handler.DoUserExist(payLoad.Employees)
+		if userErrorCheck == true {
+			c.AbortWithStatusJSON(400, gin.H{
+				"errorMessage": "The following employees need another ID",
+				"Employees":    ErrorArray,
+			})
+			return
+		}
+		response := handler.ServiceInterface.CreateEmployees(payLoad.Employees)
+		c.JSON(200, response)
 		return
 	}
 
-	response := handler.ServiceInterface.CreateEmployees(payLoad.Employees)
-	c.JSON(200, response)
+}
+
+func (handler Handler) DoUserExist(emp []model.Employee) (bool, []model.Employee) {
+	var idList []string
+	var errorEmployees []model.Employee
+
+	for _, employee := range emp {
+		response := handler.ServiceInterface.GetEmployeeById(employee.ID)
+		if len(response.ID) != 0 {
+			errorEmployees = append(errorEmployees, employee)
+		} else {
+			idList = append(idList, employee.ID)
+			var idCount int = 0
+			for _, id := range idList {
+				if id == employee.ID {
+					idCount++
+				}
+			}
+			if idCount >= 2 {
+				errorEmployees = append(errorEmployees, employee)
+			}
+		}
+	}
+	if len(errorEmployees) != 0 {
+		return true, errorEmployees
+	} else {
+		return false, nil
+	}
 }
 
 func (handler Handler) GetEmployeeHandler(c *gin.Context) {
@@ -71,7 +125,6 @@ func (handler Handler) DeleteEmployeeHandler(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Println(response)
 	c.JSON(http.StatusOK, response)
 }
 

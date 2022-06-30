@@ -16,6 +16,7 @@ type MongoDBInterface interface {
 	InsertMany(ctx context.Context, documents []interface{}, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error)
 	DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 	Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) (cur *mongo.Cursor, err error)
+	InsertOne(ctx context.Context, filter interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error)
 }
 
 type Client struct {
@@ -36,6 +37,14 @@ func (c Client) UpdateMany(docs []interface{}) interface{} {
 		log.Println("database error")
 	}
 	return results.InsertedIDs
+}
+
+func (c Client) UpdateOne(docs interface{}) interface{} {
+	results, err := c.Employee.InsertOne(context.TODO(), docs)
+	if err != nil {
+		log.Println("database error")
+	}
+	return results.InsertedID
 }
 
 func (c Client) GetByID(id string) model.Employee {
