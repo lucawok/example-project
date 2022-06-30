@@ -135,16 +135,23 @@ func (handler Handler) GetAllEmployeesHandler(c *gin.Context) {
 	limit, limitOk := c.GetQuery("limit")
 	pageInt, pageErr := strconv.Atoi(pages)
 	limitInt, limitErr := strconv.Atoi(limit)
-	if pageOk && limitOk && pageErr == nil && limitErr == nil {
+	if pageOk && limitOk {
+		if pageOk && limitOk && pageErr == nil && limitErr == nil {
 
-		response, err := handler.ServiceInterface.GetPaginatedEmployees(pageInt, limitInt)
-		if err != nil {
+			response, err := handler.ServiceInterface.GetPaginatedEmployees(pageInt, limitInt)
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"errorMessage": err.Error(),
+				})
+				return
+			}
+			c.JSON(http.StatusOK, response)
+		} else {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"errorMessage": err.Error(),
+				"errorMessage": "queries are invalid, please check or remove them",
 			})
 			return
 		}
-		c.JSON(http.StatusOK, response)
 	} else {
 		response, err := handler.ServiceInterface.GetAllEmployees()
 		if err != nil {
