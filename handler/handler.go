@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
+	"strconv"
 )
 
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . ServiceInterface
@@ -14,6 +15,7 @@ type ServiceInterface interface {
 	GetEmployeeById(id string) model.Employee
 	GetAllEmployees() ([]model.Employee, error)
 	DeleteEmployeeById(id string) (*mongo.DeleteResult, error)
+	GetPaginatedEmployees(page int, limit int) ([]model.Employee, error)
 }
 
 type Handler struct {
@@ -104,9 +106,9 @@ func (handler Handler) GetEmployeeHandler(c *gin.Context) {
 		})
 		return
 	}
-
 	response := handler.ServiceInterface.GetEmployeeById(pathParam)
 	c.JSON(http.StatusOK, response)
+
 }
 
 func (handler Handler) DeleteEmployeeHandler(c *gin.Context) {
@@ -129,12 +131,29 @@ func (handler Handler) DeleteEmployeeHandler(c *gin.Context) {
 }
 
 func (handler Handler) GetAllEmployeesHandler(c *gin.Context) {
-	response, err := handler.ServiceInterface.GetAllEmployees()
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"errorMessage": err.Error(),
-		})
-		return
+	pages, pageOk := c.GetQuery("page")
+	limit, limitOk := c.GetQuery("limit")
+	pageInt, pageErr := strconv.Atoi(pages)
+	limitInt, limitErr := strconv.Atoi(limit)
+	if pageOk && limitOk && pageErr == nil && limitErr == nil {
+
+		response, err := handler.ServiceInterface.GetPaginatedEmployees(pageInt, limitInt)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"errorMessage": err.Error(),
+			})
+			return
+		}
+		c.JSON(http.StatusOK, response)
+	} else {
+		response, err := handler.ServiceInterface.GetAllEmployees()
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"errorMessage": err.Error(),
+			})
+			return
+		}
+		c.JSON(http.StatusOK, response)
 	}
-	c.JSON(http.StatusOK, response)
+
 }

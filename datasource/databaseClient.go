@@ -81,6 +81,41 @@ func (c Client) GetAll() ([]model.Employee, error) {
 	return employees, nil
 
 }
+
+func (c Client) GetPaginated(page int, limit int) ([]model.Employee, error) {
+	filter := bson.M{}
+	findOptions := options.Find()
+	findOptions.SetSort(bson.D{{"id", 1}})
+	limit64 := int64(limit)
+	if page == 0 {
+		invalidPageNumber := errors.New("invalid page number, page number can be zero")
+		return nil, invalidPageNumber
+	}
+	pageSet := (page - 1) * limit
+	findOptions.SetLimit(limit64)
+	findOptions.SetSkip(int64(pageSet))
+	courser, err := c.Employee.Find(context.TODO(), filter, findOptions)
+
+	var employees []model.Employee
+	if err != nil {
+		return employees, nil
+	}
+	for courser.Next(context.TODO()) {
+		var employee model.Employee
+		err := courser.Decode(&employee)
+		if err != nil {
+			return employees, err
+		}
+		employees = append(employees, employee)
+	}
+	if len(employees) == 0 {
+		noEmployeesError := errors.New("no employees exist")
+		return nil, noEmployeesError
+	}
+	return employees, nil
+
+}
+
 func (c Client) DeleteByID(id string) (*mongo.DeleteResult, error) {
 	filter := bson.M{"id": id}
 	results, err := c.Employee.DeleteOne(context.TODO(), filter)
