@@ -76,19 +76,15 @@ func (handler Handler) DoUserExist(emp []model.Employee) (bool, []model.Employee
 
 	for _, employee := range emp {
 		response := handler.ServiceInterface.GetEmployeeById(employee.ID)
-		if len(response.ID) != 0 {
+		idList = append(idList, employee.ID)
+		var idCount = 0
+		for _, id := range idList {
+			if id == employee.ID {
+				idCount++
+			}
+		}
+		if idCount >= 2 || len(response.ID) != 0 {
 			errorEmployees = append(errorEmployees, employee)
-		} else {
-			idList = append(idList, employee.ID)
-			var idCount int = 0
-			for _, id := range idList {
-				if id == employee.ID {
-					idCount++
-				}
-			}
-			if idCount >= 2 {
-				errorEmployees = append(errorEmployees, employee)
-			}
 		}
 	}
 	if len(errorEmployees) != 0 {
