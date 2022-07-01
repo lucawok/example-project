@@ -11,6 +11,21 @@ import (
 )
 
 type FakeMongoDBInterface struct {
+	CountDocumentsStub        func(context.Context, interface{}, ...*options.CountOptions) (int64, error)
+	countDocumentsMutex       sync.RWMutex
+	countDocumentsArgsForCall []struct {
+		arg1 context.Context
+		arg2 interface{}
+		arg3 []*options.CountOptions
+	}
+	countDocumentsReturns struct {
+		result1 int64
+		result2 error
+	}
+	countDocumentsReturnsOnCall map[int]struct {
+		result1 int64
+		result2 error
+	}
 	DeleteOneStub        func(context.Context, interface{}, ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 	deleteOneMutex       sync.RWMutex
 	deleteOneArgsForCall []struct {
@@ -86,6 +101,72 @@ type FakeMongoDBInterface struct {
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
+}
+
+func (fake *FakeMongoDBInterface) CountDocuments(arg1 context.Context, arg2 interface{}, arg3 ...*options.CountOptions) (int64, error) {
+	fake.countDocumentsMutex.Lock()
+	ret, specificReturn := fake.countDocumentsReturnsOnCall[len(fake.countDocumentsArgsForCall)]
+	fake.countDocumentsArgsForCall = append(fake.countDocumentsArgsForCall, struct {
+		arg1 context.Context
+		arg2 interface{}
+		arg3 []*options.CountOptions
+	}{arg1, arg2, arg3})
+	stub := fake.CountDocumentsStub
+	fakeReturns := fake.countDocumentsReturns
+	fake.recordInvocation("CountDocuments", []interface{}{arg1, arg2, arg3})
+	fake.countDocumentsMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeMongoDBInterface) CountDocumentsCallCount() int {
+	fake.countDocumentsMutex.RLock()
+	defer fake.countDocumentsMutex.RUnlock()
+	return len(fake.countDocumentsArgsForCall)
+}
+
+func (fake *FakeMongoDBInterface) CountDocumentsCalls(stub func(context.Context, interface{}, ...*options.CountOptions) (int64, error)) {
+	fake.countDocumentsMutex.Lock()
+	defer fake.countDocumentsMutex.Unlock()
+	fake.CountDocumentsStub = stub
+}
+
+func (fake *FakeMongoDBInterface) CountDocumentsArgsForCall(i int) (context.Context, interface{}, []*options.CountOptions) {
+	fake.countDocumentsMutex.RLock()
+	defer fake.countDocumentsMutex.RUnlock()
+	argsForCall := fake.countDocumentsArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeMongoDBInterface) CountDocumentsReturns(result1 int64, result2 error) {
+	fake.countDocumentsMutex.Lock()
+	defer fake.countDocumentsMutex.Unlock()
+	fake.CountDocumentsStub = nil
+	fake.countDocumentsReturns = struct {
+		result1 int64
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeMongoDBInterface) CountDocumentsReturnsOnCall(i int, result1 int64, result2 error) {
+	fake.countDocumentsMutex.Lock()
+	defer fake.countDocumentsMutex.Unlock()
+	fake.CountDocumentsStub = nil
+	if fake.countDocumentsReturnsOnCall == nil {
+		fake.countDocumentsReturnsOnCall = make(map[int]struct {
+			result1 int64
+			result2 error
+		})
+	}
+	fake.countDocumentsReturnsOnCall[i] = struct {
+		result1 int64
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeMongoDBInterface) DeleteOne(arg1 context.Context, arg2 interface{}, arg3 ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
@@ -423,6 +504,8 @@ func (fake *FakeMongoDBInterface) InsertOneReturnsOnCall(i int, result1 *mongo.I
 func (fake *FakeMongoDBInterface) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.countDocumentsMutex.RLock()
+	defer fake.countDocumentsMutex.RUnlock()
 	fake.deleteOneMutex.RLock()
 	defer fake.deleteOneMutex.RUnlock()
 	fake.findMutex.RLock()
